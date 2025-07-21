@@ -7,11 +7,9 @@ const port = 3000
 // 中介層設定
 app.use(cors())
 app.use(express.json())
-// 設定靜態檔案服務，提供images資料夾中的圖片
-app.use("/images", express.static("images"))
 
 // 模擬電商資料庫
-let products = [
+let testData = [
   { id: 1, name: "香蕉", category: "水果", price: 50 },
   { id: 2, name: "蘋果", category: "水果", price: 35 },
   { id: 3, name: "西瓜", category: "水果", price: 182 },
@@ -39,10 +37,10 @@ app.get("/api/test/:id", (req, res) => {
 
 // POST /api/test - 新增資料
 app.post("/api/test", (req, res) => {
-  const { name, category } = req.body
+  const { name, category, price } = req.body
 
-  if (!name || !category) {
-    return res.status(400).json({ message: "名稱和分類不能為空" })
+  if (!name || !category || !price) {
+    return res.status(400).json({ message: "名稱、分類和價格不能為空" })
   }
 
   // 生成新的 ID
@@ -52,6 +50,7 @@ app.post("/api/test", (req, res) => {
     id: newId,
     name: name,
     category: category,
+    price: price,
   }
 
   testData.push(newData)
@@ -61,7 +60,7 @@ app.post("/api/test", (req, res) => {
 // PUT /api/test/:id - 更新資料
 app.put("/api/test/:id", (req, res) => {
   const id = parseInt(req.params.id)
-  const { name, category } = req.body
+  const { name, category, price } = req.body
 
   const dataIndex = testData.findIndex((item) => item.id === id)
 
@@ -69,14 +68,15 @@ app.put("/api/test/:id", (req, res) => {
     return res.status(404).json({ message: "找不到資料" })
   }
 
-  if (!name || !category) {
-    return res.status(400).json({ message: "名稱和分類不能為空" })
+  if (!name || !category || !price) {
+    return res.status(400).json({ message: "名稱、分類和價格不能為空" })
   }
 
   testData[dataIndex] = {
     id: id,
     name: name,
     category: category,
+    price: price,
   }
 
   res.json(testData[dataIndex])
@@ -90,9 +90,9 @@ app.delete("/api/test/:id", (req, res) => {
   if (dataIndex === -1) {
     return res.status(404).json({ message: "找不到資料" })
   }
-
+  const deletedData = testData[dataIndex]
   testData.splice(dataIndex, 1)
-  res.json({ message: "資料已刪除" })
+  res.json(deletedData)
 })
 
 // 啟動伺服器
